@@ -2,7 +2,7 @@
 
 #### **图库展示（在generated_icons文件夹下）：**
 
-![屏幕截图 2026-09-19 225706](folder_skin_tool\images\屏幕截图 2026-09-19 225706.png)
+<img src="folder_skin_tool\images\屏幕截图 2026-09-19 225706.png" alt="屏幕截图 2026-09-19 225706" style="zoom:50%;" />
 
 #### **character和file图标在asset文件夹下：**
 
@@ -33,7 +33,7 @@
 
 #### **参数建议：**
 
-<img src="folder_skin_tool\images\屏幕截图 2026-09-19 224944.png" alt="屏幕截图 2026-09-19 224944" style="zoom:50%;" /><img src="folder_skin_tool\images\屏幕截图 2026-09-19 224932.png" alt="屏幕截图 2026-09-19 224932" style="zoom: 67%;" /><img src="folder_skin_tool\images\屏幕截图 2026-09-19 224936.png" alt="屏幕截图 2026-09-19 224936" style="zoom:67%;" /><img src="C:\Users\28193\AppData\Roaming\Typora\typora-user-folder_skin_tool\images\image-20260919225117291.png" alt="image-20260919225117291" style="zoom: 50%;" />
+<img src="folder_skin_tool\images\屏幕截图 2026-09-19 224944.png" alt="屏幕截图 2026-09-19 224944" style="zoom:50%;" /><img src="folder_skin_tool\images\屏幕截图 2026-09-19 224932.png" alt="屏幕截图 2026-09-19 224932" style="zoom: 67%;" /><img src="folder_skin_tool\images\屏幕截图 2026-09-19 224936.png" alt="屏幕截图 2026-09-19 224936" style="zoom:67%;" /><img src="folder_skin_tool\images\屏幕截图 2026-09-19 225113.png" alt="image-20260919225117291" style="zoom: 50%;" />
 
 ## 左右移动与默认尺寸
 
@@ -48,7 +48,7 @@
 
 #### 效果如下：
 
-![屏幕截图 2026-09-19 224240](folder_skin_tool\images\屏幕截图 2026-09-19 224240.png)
+<img src="folder_skin_tool\images\屏幕截图 2026-09-19 224240.png" alt="屏幕截图 2026-09-19 224240"  />
 
 
 
