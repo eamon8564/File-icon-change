@@ -48,8 +48,6 @@
 
 <img src="folder_skin_tool\images\image-20260919225350608.png" alt="image-20260919225350608" style="zoom:50%;" />
 
-"D:\Desktop\interesting\"
-
 右侧「系统默认」页提供以下功能：
 
 - **导入 ICO**：选择已保存的 `.ico` 文件，导入时验证图标内容。此功能独立于左侧角色和文件夹构图，不需要选择 PNG 或目标文件夹。
