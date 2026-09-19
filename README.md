@@ -46,7 +46,9 @@
 
 ## 更改系统默认文件夹皮肤
 
-<img src="C:\Users\28193\AppData\Roaming\Typora\typora-user-folder_skin_tool\images\image-20260919225350608.png" alt="image-20260919225350608" style="zoom:50%;" />
+<img src="folder_skin_tool\images\image-20260919225350608.png" alt="image-20260919225350608" style="zoom:50%;" />
+
+"D:\Desktop\interesting\"
 
 右侧「系统默认」页提供以下功能：
 
