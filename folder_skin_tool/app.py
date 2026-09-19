@@ -3,7 +3,7 @@ from pathlib import Path
 import tkinter as tk
 from tkinter import ttk, filedialog, colorchooser, messagebox
 from PIL import ImageTk
-from core import ROOT, SkinStore, compose, export_icon, create_sample, skin_layout, fit_icon_content, icon_bytes
+from core import ROOT, SkinStore, compose, compose_single, export_icon, create_sample, skin_layout, fit_icon_content, icon_bytes
 from windows_size import default_folder_bounds
 
 COLORS = {'紫色': '#9973df', '蓝色': '#6aaee8', '黄色': '#f1c94f', '橙色': '#ee9b55', '绿色': '#79bc92', '白色': '#e7e8ef'}
@@ -22,6 +22,7 @@ class App:
             create_sample(sample)
         self.folder = tk.StringVar()
         self.character = tk.StringVar(value=str(sample))
+        self.mode = tk.StringVar(value='角色 + 文件夹')
         self.folder_skin = tk.StringVar()
         self.skin_scale = tk.DoubleVar(value=1)
         self.skin_offset = tk.DoubleVar(value=0)
@@ -54,7 +55,12 @@ class App:
         left.pack(side='left', fill='both', expand=True)
         right = ttk.Frame(middle, padding=(20, 0, 0, 0))
         right.pack(side='right', fill='y')
-        self.row(left, '1. 目标文件夹', self.folder, self.pick_folder)
+        mode_row = ttk.Frame(left)
+        mode_row.pack(fill='x', pady=(0, 4))
+        ttk.Label(mode_row, text='制作模式：').pack(side='left')
+        ttk.Combobox(mode_row, textvariable=self.mode, state='readonly',
+                     values=('角色 + 文件夹', '仅角色 PNG', '仅文件夹 PNG'), width=18).pack(side='left')
+        self.row(left, '1. 目标文件夹（仅应用时需要）', self.folder, self.pick_folder)
         self.row(left, '2. 角色 PNG', self.character, self.pick_character)
         self.row(left, '3. 文件夹皮肤 PNG（可选）', self.folder_skin, self.pick_skin)
         ttk.Button(left, text='清除皮肤，使用纯色文件夹', command=lambda: self.folder_skin.set('')).pack(anchor='w', pady=5)
@@ -73,7 +79,7 @@ class App:
         ttk.Button(left, text='匹配 Windows 默认文件夹大小', command=lambda: self.run(self.match_default_size)).pack(anchor='w', pady=(12, 3))
         ttk.Button(left, text='恢复原构图尺寸', command=self.reset_folder_size).pack(anchor='w', pady=3)
         ttk.Checkbutton(left, text='放大成品，去除四周留白（推荐）', variable=self.fill_icon, command=self.schedule).pack(anchor='w', pady=6)
-        ttk.Label(left, text='在右侧「立体遮挡」中调整文件夹开口。\n开口以上在角色后面，以下遮住角色。\n建议使用透明背景的角色和空文件夹 PNG。', foreground='#666666').pack(anchor='w', pady=10)
+        ttk.Label(left, text='单图模式只读取对应 PNG，不合成另一张图。\n立体遮挡仅在「角色 + 文件夹」模式生效。', foreground='#666666').pack(anchor='w', pady=10)
         self.preview = tk.Canvas(right, width=300, height=300, highlightthickness=0)
         self.preview.pack()
         ttk.Label(right, text='透明背景预览', anchor='center').pack(fill='x', pady=8)
@@ -126,6 +132,7 @@ class App:
         ttk.Label(outer, textvariable=self.status, wraplength=800, foreground='#514078').pack(anchor='w')
         self.character.trace_add('write', self.schedule)
         self.folder_skin.trace_add('write', self.schedule)
+        self.mode.trace_add('write', self.schedule)
         self.draw()
 
     def row(self, parent, title, variable, command):
@@ -190,7 +197,12 @@ class App:
         self.change_zoom()
 
     def render(self):
-        result = compose(self.character.get(), self.color, self.scale.get(), self.offset.get(),
+        if self.mode.get() == '仅角色 PNG':
+            result = compose_single(self.character.get().strip(), self.scale.get(), self.character_x.get(), self.offset.get())
+        elif self.mode.get() == '仅文件夹 PNG':
+            result = compose_single(self.folder_skin.get().strip(), self.skin_scale.get(), self.skin_x.get(), self.skin_offset.get())
+        else:
+            result = compose(self.character.get(), self.color, self.scale.get(), self.offset.get(),
                        folder_skin=self.folder_skin.get().strip() or None,
                        skin_scale=self.skin_scale.get(), skin_offset=self.skin_offset.get(),
                        depth=self.depth.get(), opening_left=self.opening_left.get(),
@@ -212,7 +224,7 @@ class App:
             result, (sx, sy, tx, ty) = self.render()
             self.photo = ImageTk.PhotoImage(result.resize((300, 300)))
             self.preview.create_image(150, 150, image=self.photo)
-            if self.guide.get() and self.depth.get() and self.folder_skin.get().strip():
+            if self.mode.get() == '角色 + 文件夹' and self.guide.get() and self.depth.get() and self.folder_skin.get().strip():
                 skin, x, y = skin_layout(self.folder_skin.get().strip(), self.skin_scale.get(), self.skin_offset.get(),
                                          self.skin_x.get(), self.folder_bounds)
                 factor = 300 / 512

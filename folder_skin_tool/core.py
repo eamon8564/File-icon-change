@@ -106,6 +106,16 @@ def layout_image(skin, scale, offset, x_offset=0, bounds=None):
 def skin_layout(path, scale, offset, x_offset=0, bounds=None):
     return layout_image(load_png(path), scale, offset, x_offset, bounds)
 
+def compose_single(path, scale=1.0, x_offset=0, y_offset=0):
+    if not path:
+        raise ValueError('请为当前制作模式选择一张 PNG 图片。')
+    sprite = load_png(path)
+    ratio = min(480 / sprite.width, 480 / sprite.height) * float(scale)
+    sprite = sprite.resize((max(1, round(sprite.width * ratio)), max(1, round(sprite.height * ratio))), Image.Resampling.LANCZOS)
+    canvas = Image.new('RGBA', (512, 512))
+    canvas.alpha_composite(sprite, ((512-sprite.width)//2+int(x_offset), (512-sprite.height)//2+int(y_offset)))
+    return canvas
+
 def compose(character, color='#9973df', scale=1.0, offset=0,
             folder_skin=None, skin_scale=1.0, skin_offset=0,
             depth=True, opening_left=.35, opening_right=.25, shadow=.35,
