@@ -15,6 +15,34 @@ KEY = r'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Icons'
 DIRECTORY = Path(os.environ['ProgramData']) / 'FolderSkinTool'
 
 
+def validate_icon(icon_data):
+    from io import BytesIO
+    from PIL import Image
+    with Image.open(BytesIO(icon_data)) as image:
+        if image.format != 'ICO':
+            raise ValueError('请选择有效的 .ico 图标文件。')
+        sizes = image.ico.sizes()
+        for size in sizes:
+            image.ico.getimage(size).load()
+    return sorted(sizes)
+
+
+def prepare_request(directory, payload=None):
+    directory = Path(directory)
+    if payload is not None:
+        (directory / 'input.ico').write_bytes(payload)
+    # Preserve the caller's file permissions and integrity level across elevation.
+    (directory / 'result.json').write_text('{"ok": false, "error": "操作尚未完成。"}', encoding='utf-8')
+
+
+def write_result(directory, result):
+    with open(Path(directory) / 'result.json', 'r+b') as stream:
+        stream.write(json.dumps(result, ensure_ascii=False).encode('utf-8'))
+        stream.truncate()
+        stream.flush()
+        os.fsync(stream.fileno())
+
+
 class Registry:
     def read(self, name):
         try:
@@ -68,12 +96,7 @@ class SystemSkin:
                 raise ValueError('系统文件夹图标已被其他软件修改；为避免覆盖，保留备份并停止操作。')
 
     def apply(self, icon_data):
-        from io import BytesIO
-        from PIL import Image
-        with Image.open(BytesIO(icon_data)) as image:
-            if image.format != 'ICO':
-                raise ValueError('需要有效的 ICO 图标。')
-            image.load()
+        validate_icon(icon_data)
         with SkinStore(self.directory).locked():
             state = self.load()
             if state:
@@ -95,6 +118,8 @@ class SystemSkin:
             self.save(state)
             for name in ('3', '4'):
                 self.registry.write(name, record)
+            if any(self.registry.read(name) != record for name in ('3', '4')):
+                raise RuntimeError('系统设置写入后校验失败，已保留备份，请执行恢复。')
             state['status'] = 'active'
             self.save(state)
 
@@ -132,6 +157,8 @@ def run_elevated(operation, request_dir):
     kernel.WaitForSingleObject.argtypes = [wintypes.HANDLE, wintypes.DWORD]
     kernel.WaitForSingleObject.restype = wintypes.DWORD
     kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+    kernel.GetExitCodeProcess.argtypes = [wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD)]
+    kernel.GetExitCodeProcess.restype = wintypes.BOOL
     info = ExecuteInfo()
     info.cbSize = ctypes.sizeof(info)
     info.fMask = 0x40 | 0x100
@@ -148,6 +175,11 @@ def run_elevated(operation, request_dir):
     try:
         if kernel.WaitForSingleObject(info.hProcess, 0xFFFFFFFF) != 0:
             raise RuntimeError('等待系统图标操作失败，请检查备份后重试。')
+        code = wintypes.DWORD()
+        if not kernel.GetExitCodeProcess(info.hProcess, ctypes.byref(code)):
+            raise ctypes.WinError(ctypes.get_last_error())
+        if code.value:
+            raise RuntimeError('管理员进程未正常完成；请保留系统备份。设置可能已部分写入，可尝试恢复系统默认图标。')
     finally:
         kernel.CloseHandle(info.hProcess)
     result_path = Path(request_dir) / 'result.json'
@@ -156,11 +188,20 @@ def run_elevated(operation, request_dir):
     result = json.loads(result_path.read_text(encoding='utf-8'))
     if not result['ok']:
         raise RuntimeError(result['error'])
+    # Notify the interactive caller too: the elevated helper may run under
+    # another account/session and its notification alone is insufficient.
+    refresh_current_session()
+
+
+def refresh_current_session():
+    refresh(Path.home())
 
 
 def main():
     operation, request = sys.argv[1:]
     request = Path(request)
+    # Verify the result channel before any registry mutation.
+    write_result(request, {'ok': False, 'error': '操作尚未完成。'})
     try:
         if not ctypes.windll.shell32.IsUserAnAdmin():
             raise PermissionError('此操作需要管理员权限。')
@@ -175,7 +216,7 @@ def main():
         result = {'ok': True}
     except Exception as exc:
         result = {'ok': False, 'error': str(exc)}
-    (request / 'result.json').write_text(json.dumps(result, ensure_ascii=False), encoding='utf-8')
+    write_result(request, result)
 
 
 if __name__ == '__main__':

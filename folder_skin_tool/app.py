@@ -88,12 +88,18 @@ class App:
         system_panel = ttk.Frame(tabs, padding=6)
         tabs.add(system_panel, text='系统默认')
         self.system_busy = False
+        self.system_icon = tk.StringVar()
+        icon_row = ttk.Frame(system_panel)
+        icon_row.pack(fill='x', pady=3)
+        ttk.Entry(icon_row, textvariable=self.system_icon, width=20).pack(side='left', fill='x', expand=True)
+        ttk.Button(icon_row, text='导入 ICO', command=lambda: self.run(self.pick_system_icon)).pack(side='right', padx=(4, 0))
         self.system_buttons = []
         for title, operation in [('设为系统默认文件夹图标', 'apply'), ('恢复系统默认图标', 'restore')]:
             button = ttk.Button(system_panel, text=title, command=lambda op=operation: self.run(lambda: self.system_action(op)))
             button.pack(fill='x', pady=5)
             self.system_buttons.append(button)
-        ttk.Label(system_panel, text='作用于这台电脑的普通文件夹。\n需要管理员权限；保留恢复备份。\n部分缩略图和自定义文件夹不受影响。\n未更新时请注销后重新登录。', wraplength=280).pack(anchor='w', pady=5)
+        ttk.Button(system_panel, text='刷新当前桌面图标', command=lambda: self.run(self.refresh_system_icons)).pack(fill='x', pady=3)
+        ttk.Label(system_panel, text='使用导入的 ICO，独立于当前构图。\n需要管理员权限；保留恢复备份。\n部分缩略图和自定义文件夹不受影响。\n未更新时请注销后重新登录。', wraplength=280).pack(anchor='w', pady=5)
         ttk.Label(output_panel, textvariable=self.zoom_label).pack(anchor='w')
         ttk.Scale(output_panel, from_=1, to=1.6, variable=self.output_zoom, command=self.change_zoom).pack(fill='x')
         ttk.Button(output_panel, text='放大到 120%', command=lambda: self.set_zoom(1.2)).pack(fill='x', pady=5)
@@ -259,14 +265,38 @@ class App:
         if failures:
             messagebox.showwarning('部分文件夹保留待恢复记录', '\n'.join(failures))
 
+    def pick_system_icon(self):
+        from system_skin import validate_icon
+        chosen = filedialog.askopenfilename(title='导入系统默认文件夹 ICO',
+                    initialdir=ROOT / 'generated_icons', filetypes=[('Windows 图标', '*.ico')])
+        if not chosen:
+            return
+        sizes = validate_icon(Path(chosen).read_bytes())
+        self.system_icon.set(chosen)
+        self.status.set('已导入系统图标：' + Path(chosen).name + '（' + '、'.join(str(w) for w, h in sizes) + ' 像素）')
+
+    def refresh_system_icons(self):
+        from system_skin import refresh_current_session
+        refresh_current_session()
+        self.status.set('已请求当前桌面刷新；若新建普通空文件夹仍未更新，请注销后重新登录。已有单独皮肤和内容缩略图可能覆盖系统默认图标。')
+
+    def system_payload(self):
+        from system_skin import validate_icon
+        path = self.system_icon.get().strip()
+        if not path:
+            raise ValueError('请先在「系统默认」页导入一个 .ico 文件。')
+        payload = Path(path).read_bytes()
+        validate_icon(payload)
+        return payload
+
     def system_action(self, operation):
         if self.system_busy:
             return
         import queue
         import tempfile
         import threading
-        from system_skin import run_elevated
-        payload = icon_bytes(self.image()) if operation == 'apply' else None
+        from system_skin import run_elevated, prepare_request
+        payload = self.system_payload() if operation == 'apply' else None
         results = queue.Queue()
         self.system_busy = True
         for button in self.system_buttons:
@@ -276,8 +306,7 @@ class App:
         def worker():
             try:
                 with tempfile.TemporaryDirectory(prefix='folder_skin_system_') as directory:
-                    if payload:
-                        (Path(directory) / 'input.ico').write_bytes(payload)
+                    prepare_request(directory, payload)
                     run_elevated(operation, directory)
                 results.put(None)
             except Exception as exc:
@@ -297,7 +326,7 @@ class App:
                 messagebox.showerror('系统图标操作未完成', error)
             else:
                 default_folder_bounds.cache_clear()
-                self.status.set(('已设置系统默认文件夹图标。' if operation == 'apply' else '已恢复系统图标原设置。') + '若未更新，请注销后重新登录。')
+                self.status.set(('系统图标设置已写入并校验。' if operation == 'apply' else '已恢复系统图标原设置。') + '已请求桌面刷新；若新建空文件夹仍未更新，请注销后重新登录。')
 
         threading.Thread(target=worker, daemon=False).start()
         self.window.after(150, completed)

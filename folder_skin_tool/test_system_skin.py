@@ -5,6 +5,9 @@ import unittest
 from PIL import Image
 from core import icon_bytes
 from system_skin import SystemSkin
+from system_skin import prepare_request, write_result, validate_icon
+import json
+from unittest.mock import patch
 
 
 class FakeRegistry:
@@ -87,6 +90,30 @@ class SystemSkinTests(unittest.TestCase):
         self.store.apply(self.icon)
         self.store.restore()
         self.assertEqual(file.read_text(), 'keep')
+
+    def test_result_updates_existing_file_without_replacement(self):
+        prepare_request(self.temp.name, self.icon)
+        result = Path(self.temp.name) / 'result.json'
+        identity = result.stat().st_ino
+        write_result(self.temp.name, {'ok': False, 'error': 'long message' * 30})
+        write_result(self.temp.name, {'ok': True})
+        self.assertEqual(result.stat().st_ino, identity)
+        self.assertEqual(json.loads(result.read_text(encoding='utf-8')), {'ok': True})
+        self.assertEqual((Path(self.temp.name) / 'input.ico').read_bytes(), self.icon)
+
+    def test_missing_result_channel_stops_before_registry_changes(self):
+        import system_skin
+        with patch('sys.argv', ['system_skin.py', 'restore', self.temp.name]), patch.object(system_skin, 'SystemSkin') as store:
+            with self.assertRaises(FileNotFoundError):
+                system_skin.main()
+            store.assert_not_called()
+
+    def test_png_renamed_as_icon_is_rejected(self):
+        from io import BytesIO
+        stream = BytesIO()
+        Image.new('RGBA', (32, 32), 'red').save(stream, format='PNG')
+        with self.assertRaises(ValueError):
+            validate_icon(stream.getvalue())
 
 
 if __name__ == '__main__':
