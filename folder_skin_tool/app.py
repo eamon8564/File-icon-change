@@ -3,7 +3,7 @@ from pathlib import Path
 import tkinter as tk
 from tkinter import ttk, filedialog, colorchooser, messagebox
 from PIL import ImageTk
-from core import ROOT, SkinStore, compose, compose_single, export_icon, create_sample, skin_layout, fit_icon_content, icon_bytes
+from core import ROOT, SkinStore, compose, compose_single, export_icon, create_sample, skin_layout, fit_icon_content, icon_bytes, png_to_icon_bytes
 from windows_size import default_folder_bounds
 
 COLORS = {'紫色': '#9973df', '蓝色': '#6aaee8', '黄色': '#f1c94f', '橙色': '#ee9b55', '绿色': '#79bc92', '白色': '#e7e8ef'}
@@ -122,7 +122,10 @@ class App:
             ttk.Label(depth_panel, text=label).pack(anchor='w')
             ttk.Scale(depth_panel, from_=0, to=1, variable=variable, command=self.schedule).pack(fill='x')
         ttk.Checkbutton(depth_panel, text='显示开口辅助线（不导出）', variable=self.guide, command=self.schedule).pack(anchor='w')
-        ttk.Button(right, text='手动保存 PNG + ICO', command=lambda: self.run(self.export)).pack(fill='x', pady=4)
+        save_row = ttk.Frame(right)
+        save_row.pack(fill='x', pady=4)
+        ttk.Button(save_row, text='手动保存 PNG + ICO', command=lambda: self.run(self.export)).pack(side='left', fill='x', expand=True)
+        ttk.Button(save_row, text='PNG 转 ICO', command=lambda: self.run(self.convert_png)).pack(side='left', fill='x', expand=True, padx=(4, 0))
         ttk.Button(right, text='应用皮肤', command=lambda: self.run(self.apply)).pack(fill='x', pady=4)
         actions = ttk.Frame(outer)
         actions.pack(fill='x', pady=(16, 10))
@@ -240,6 +243,25 @@ class App:
         except Exception as exc:
             self.status.set('未完成：' + str(exc))
             messagebox.showerror('操作未完成', str(exc))
+
+    def convert_png(self):
+        source = filedialog.askopenfilename(title='选择要直接转换的 PNG',
+                    filetypes=[('PNG 图片', '*.png')], initialdir=ROOT / 'assets')
+        if not source:
+            return
+        payload = png_to_icon_bytes(source)
+        chosen = filedialog.asksaveasfilename(title='保存 ICO 图标',
+                    initialdir=Path(source).parent, initialfile=Path(source).stem + '.ico',
+                    defaultextension='.ico', filetypes=[('Windows 图标', '*.ico')], confirmoverwrite=False)
+        if not chosen:
+            return
+        destination = Path(chosen).with_suffix('.ico')
+        if destination.resolve() == Path(source).resolve():
+            raise ValueError('保存位置不能与源图片相同。')
+        if destination.exists() and not messagebox.askyesno('覆盖已有图标？', str(destination) + '\n是否覆盖？'):
+            return
+        destination.write_bytes(payload)
+        self.status.set('已转换并保存 ICO：' + str(destination))
 
     def export(self):
         from datetime import datetime

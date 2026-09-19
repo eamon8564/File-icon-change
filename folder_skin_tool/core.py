@@ -202,6 +202,19 @@ def icon_bytes(image):
     image.save(stream, format='ICO', sizes=SIZES)
     return stream.getvalue()
 
+def png_to_icon_bytes(source):
+    """Convert the complete PNG, preserving its aspect ratio and transparency."""
+    with Image.open(source) as image:
+        if image.format != 'PNG':
+            raise ValueError('请选择有效的 PNG 图片。')
+        image = image.convert('RGBA')
+    ratio = min(512 / image.width, 512 / image.height)
+    size = (max(1, round(image.width * ratio)), max(1, round(image.height * ratio)))
+    resized = image.resize(size, Image.Resampling.LANCZOS)
+    canvas = Image.new('RGBA', (512, 512))
+    canvas.alpha_composite(resized, ((512-size[0])//2, (512-size[1])//2))
+    return icon_bytes(canvas)
+
 def create_sample(path):
     image = Image.new('RGBA', (400, 400))
     d = ImageDraw.Draw(image)
