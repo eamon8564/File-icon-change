@@ -4,13 +4,15 @@
 
 <img src="folder_skin_tool\images\屏幕截图 2026-09-19 225706.png" alt="屏幕截图 2026-09-19 225706" style="zoom:50%;" />
 
+### 可手动替换（仅单个文件夹，后面有全局替换方法）：右键文件夹点击属性->自定义->找到/generated_icons，选择一个icon进行替换
+
+<img src="folder_skin_tool\images\屏幕截图 2026-09-19 231959.png" alt="屏幕截图 2026-09-19 231959" style="zoom: 67%;" /><img src="folder_skin_tool\images\屏幕截图 2026-09-19 231933.png" alt="屏幕截图 2026-09-19 231933" style="zoom: 50%;" />
+
 #### **character和file图标在asset文件夹下：**
 
 <img src="folder_skin_tool\images\屏幕截图 2026-09-19 225904.png" alt="屏幕截图 2026-09-19 225904" style="zoom:50%;" />
 
 <img src="folder_skin_tool\images\屏幕截图 2026-09-19 225847.png" alt="屏幕截图 2026-09-19 225847" style="zoom:50%;" />
-
-"D:\Desktop\interesting\folder_skin_tool\folder_skin_tool\images"
 
 #### **效果展示：**
 
