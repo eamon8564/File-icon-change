@@ -2,19 +2,19 @@
 
 #### **图库展示（在generated_icons文件夹下）：**
 
-![image-20260919225721614](C:\Users\28193\AppData\Roaming\Typora\typora-user-images\image-20260919225721614.png)
+![屏幕截图 2026-09-19 225706](images\屏幕截图 2026-09-19 225706.png)
 
 #### **character和file图标在asset文件夹下：**
 
-<img src="C:\Users\28193\Pictures\Screenshots\屏幕截图 2026-09-19 225904.png" alt="屏幕截图 2026-09-19 225904" style="zoom:50%;" />
+<img src="images\屏幕截图 2026-09-19 225904.png" alt="屏幕截图 2026-09-19 225904" style="zoom:50%;" />
 
-<img src="C:\Users\28193\Pictures\Screenshots\屏幕截图 2026-09-19 225847.png" alt="屏幕截图 2026-09-19 225847" style="zoom:50%;" />
+<img src="images\屏幕截图 2026-09-19 225847.png" alt="屏幕截图 2026-09-19 225847" style="zoom:50%;" />
 
 
 
 #### **效果展示：**
 
-<img src="C:\Users\28193\Pictures\Screenshots\屏幕截图 2026-09-19 224240.png" alt="屏幕截图 2026-09-19 224240" style="zoom:50%;" /><img src="C:\Users\28193\Pictures\Screenshots\屏幕截图 2026-09-19 224643.png" alt="屏幕截图 2026-09-19 224643" style="zoom: 67%;" />
+<img src="images\屏幕截图 2026-09-19 224240.png" alt="屏幕截图 2026-09-19 224240" style="zoom:50%;" /><img src="images\屏幕截图 2026-09-19 224643.png" alt="屏幕截图 2026-09-19 224643" style="zoom: 67%;" />
 
 
 
@@ -33,7 +33,7 @@
 
 #### **参数建议：**
 
-<img src="C:\Users\28193\Pictures\Screenshots\屏幕截图 2026-09-19 224944.png" alt="屏幕截图 2026-09-19 224944" style="zoom:50%;" /><img src="C:\Users\28193\Pictures\Screenshots\屏幕截图 2026-09-19 224932.png" alt="屏幕截图 2026-09-19 224932" style="zoom: 67%;" /><img src="C:\Users\28193\Pictures\Screenshots\屏幕截图 2026-09-19 224936.png" alt="屏幕截图 2026-09-19 224936" style="zoom:67%;" /><img src="C:\Users\28193\AppData\Roaming\Typora\typora-user-images\image-20260919225117291.png" alt="image-20260919225117291" style="zoom: 50%;" />
+<img src="images\屏幕截图 2026-09-19 224944.png" alt="屏幕截图 2026-09-19 224944" style="zoom:50%;" /><img src="images\屏幕截图 2026-09-19 224932.png" alt="屏幕截图 2026-09-19 224932" style="zoom: 67%;" /><img src="images\屏幕截图 2026-09-19 224936.png" alt="屏幕截图 2026-09-19 224936" style="zoom:67%;" /><img src="C:\Users\28193\AppData\Roaming\Typora\typora-user-images\image-20260919225117291.png" alt="image-20260919225117291" style="zoom: 50%;" />
 
 ## 左右移动与默认尺寸
 
@@ -61,5 +61,5 @@
 
 按 **Ctrl＋Shift＋Esc → Windows 资源管理器 → 重新启动，即可更改所有系统默认图标，效果如下：**
 
-![屏幕截图 2026-09-19 224240](C:\Users\28193\Pictures\Screenshots\屏幕截图 2026-09-19 224240.png)
+![屏幕截图 2026-09-19 224240](images\屏幕截图 2026-09-19 224240.png)
 
